@@ -1,0 +1,220 @@
+:root {
+    --sfondo: #e6ecef;
+    --pannello: #f7f9fa;
+    --inchiostro: #17262e;
+    --tenue: #5d6f78;
+    --linea: #c5d1d7;
+    --accento: #d9480f;
+    --accento-scuro: #b13a0b;
+    --pericolo: #a4161a;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: var(--sfondo);
+    color: var(--inchiostro);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 16px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+#stato {
+    font-size: 0.95rem;
+    color: var(--tenue);
+}
+
+#stato strong {
+    color: var(--inchiostro);
+}
+
+main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.video {
+    background: var(--inchiostro);
+    border-radius: 10px;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+}
+
+.video img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.comandi {
+    background: var(--pannello);
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.volo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+button {
+    font: inherit;
+    font-weight: 600;
+    color: var(--inchiostro);
+    background: #fff;
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+    padding: 14px 8px;
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: background 0.1s, border-color 0.1s;
+}
+
+button small {
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: var(--tenue);
+}
+
+button:hover {
+    border-color: var(--inchiostro);
+}
+
+button:focus-visible {
+    outline: 3px solid var(--accento);
+    outline-offset: 2px;
+}
+
+button.attivo {
+    background: var(--accento);
+    border-color: var(--accento);
+    color: #fff;
+}
+
+button.attivo small {
+    color: #ffe3d6;
+}
+
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+#decolla {
+    background: var(--accento);
+    border-color: var(--accento);
+    color: #fff;
+}
+
+#decolla:hover:not(:disabled) {
+    background: var(--accento-scuro);
+}
+
+#atterra {
+    background: var(--inchiostro);
+    border-color: var(--inchiostro);
+    color: #fff;
+}
+
+.croce {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.croce .vuoto {
+    visibility: hidden;
+}
+
+.coppia {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.velocita {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+}
+
+.velocita input {
+    flex: 1;
+    accent-color: var(--accento);
+}
+
+.velocita output {
+    min-width: 2ch;
+    font-weight: 700;
+}
+
+#emergenza {
+    color: var(--pericolo);
+    border-color: var(--pericolo);
+    background: transparent;
+    padding: 10px;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#emergenza:hover {
+    background: var(--pericolo);
+    color: #fff;
+}
+
+.nota {
+    font-size: 0.8rem;
+    color: var(--tenue);
+    line-height: 1.4;
+}
+
+@media (max-width: 800px) {
+    main {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button {
+        transition: none;
+    }
+}

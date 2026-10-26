@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pannello di controllo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Pannello di controllo</h1>
+        <div id="stato">Batteria <strong id="batteria">–</strong>% · <strong id="volo">a terra</strong> · <span id="messaggio"></span></div>
+    </header>
+
+    <main>
+        <div class="video"><img src="/video_feed" alt="Video in diretta dal Tello"></div>
+
+        <section class="comandi">
+            <div>
+                <h2>Decollo e atterraggio</h2>
+                <div class="volo">
+                    <button id="decolla">Decolla</button>
+                    <button id="atterra">Atterra</button>
+                </div>
+            </div>
+
+            <div>
+                <h2>Spostamento</h2>
+                <div class="croce">
+                    <span class="vuoto"></span>
+                    <button data-axis="fb" data-dir="1">Avanti<small>W</small></button>
+                    <span class="vuoto"></span>
+                    <button data-axis="lr" data-dir="-1">Sinistra<small>A</small></button>
+                    <button data-axis="fb" data-dir="-1">Indietro<small>S</small></button>
+                    <button data-axis="lr" data-dir="1">Destra<small>D</small></button>
+                </div>
+            </div>
+
+            <div>
+                <h2>Quota e rotazione</h2>
+                <div class="coppia">
+                    <button data-axis="ud" data-dir="1">Su<small>R</small></button>
+                    <button data-axis="ud" data-dir="-1">Giù<small>F</small></button>
+                </div>
+                <div class="coppia">
+                    <button data-axis="yaw" data-dir="-1">Ruota a sinistra<small>Q</small></button>
+                    <button data-axis="yaw" data-dir="1">Ruota a destra<small>E</small></button>
+                </div>
+            </div>
+
+            <label class="velocita">Velocità
+                <input type="range" id="velocita" min="10" max="60" step="5" value="30">
+                <output id="velocitaValore">30</output>
+            </label>
+
+            <p class="nota">Tieni premuto un pulsante (o un tasto) per muoverti, rilascia per fermarti. Barra spaziale: stop.</p>
+
+            <button id="emergenza">Emergenza: spegni i motori</button>
+        </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
