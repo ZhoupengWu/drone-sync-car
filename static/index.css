@@ -1,12 +1,12 @@
 :root {
-    --sfondo: #e6ecef;
-    --pannello: #f7f9fa;
-    --inchiostro: #17262e;
-    --tenue: #5d6f78;
-    --linea: #c5d1d7;
-    --accento: #d9480f;
-    --accento-scuro: #b13a0b;
-    --pericolo: #a4161a;
+    --color-background: #e6ecef;
+    --color-panel: #f7f9fa;
+    --color-text: #17262e;
+    --color-text-muted: #5d6f78;
+    --color-border: #c5d1d7;
+    --color-accent: #d9480f;
+    --color-accent-dark: #b13a0b;
+    --color-danger: #a4161a;
 }
 
 * {
@@ -16,8 +16,8 @@
 }
 
 body {
-    background: var(--sfondo);
-    color: var(--inchiostro);
+    background: var(--color-background);
+    color: var(--color-text);
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     min-height: 100vh;
     padding: 20px;
@@ -37,13 +37,13 @@ h1 {
     font-weight: 700;
 }
 
-#stato {
+#statusBar {
     font-size: 0.95rem;
-    color: var(--tenue);
+    color: var(--color-text-muted);
 }
 
-#stato strong {
-    color: var(--inchiostro);
+#statusBar strong {
+    color: var(--color-text);
 }
 
 main {
@@ -53,23 +53,23 @@ main {
     align-items: start;
 }
 
-.video {
-    background: var(--inchiostro);
+.video-panel {
+    background: var(--color-text);
     border-radius: 10px;
     overflow: hidden;
     aspect-ratio: 4 / 3;
 }
 
-.video img {
+.video-panel img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     display: block;
 }
 
-.comandi {
-    background: var(--pannello);
-    border: 1px solid var(--linea);
+.controls-panel {
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 18px;
     display: flex;
@@ -83,7 +83,7 @@ h2 {
     margin-bottom: 10px;
 }
 
-.volo {
+.takeoff-land-group {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
@@ -92,9 +92,9 @@ h2 {
 button {
     font: inherit;
     font-weight: 600;
-    color: var(--inchiostro);
+    color: var(--color-text);
     background: #fff;
-    border: 1px solid var(--linea);
+    border: 1px solid var(--color-border);
     border-radius: 10px;
     padding: 14px 8px;
     cursor: pointer;
@@ -110,25 +110,25 @@ button {
 button small {
     font-weight: 400;
     font-size: 0.75rem;
-    color: var(--tenue);
+    color: var(--color-text-muted);
 }
 
 button:hover {
-    border-color: var(--inchiostro);
+    border-color: var(--color-text);
 }
 
 button:focus-visible {
-    outline: 3px solid var(--accento);
+    outline: 3px solid var(--color-accent);
     outline-offset: 2px;
 }
 
-button.attivo {
-    background: var(--accento);
-    border-color: var(--accento);
+button.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
     color: #fff;
 }
 
-button.attivo small {
+button.active small {
     color: #ffe3d6;
 }
 
@@ -137,73 +137,73 @@ button:disabled {
     cursor: not-allowed;
 }
 
-#decolla {
-    background: var(--accento);
-    border-color: var(--accento);
+#takeoffButton {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
     color: #fff;
 }
 
-#decolla:hover:not(:disabled) {
-    background: var(--accento-scuro);
+#takeoffButton:hover:not(:disabled) {
+    background: var(--color-accent-dark);
 }
 
-#atterra {
-    background: var(--inchiostro);
-    border-color: var(--inchiostro);
+#landButton {
+    background: var(--color-text);
+    border-color: var(--color-text);
     color: #fff;
 }
 
-.croce {
+.movement-pad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
 }
 
-.croce .vuoto {
+.movement-pad .pad-spacer {
     visibility: hidden;
 }
 
-.coppia {
+.button-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
     margin-bottom: 8px;
 }
 
-.velocita {
+.speed-control {
     display: flex;
     align-items: center;
     gap: 12px;
     font-size: 0.9rem;
 }
 
-.velocita input {
+.speed-control input {
     flex: 1;
-    accent-color: var(--accento);
+    accent-color: var(--color-accent);
 }
 
-.velocita output {
+.speed-control output {
     min-width: 2ch;
     font-weight: 700;
 }
 
-#emergenza {
-    color: var(--pericolo);
-    border-color: var(--pericolo);
+#emergencyButton {
+    color: var(--color-danger);
+    border-color: var(--color-danger);
     background: transparent;
     padding: 10px;
     flex-direction: row;
     justify-content: center;
 }
 
-#emergenza:hover {
-    background: var(--pericolo);
+#emergencyButton:hover {
+    background: var(--color-danger);
     color: #fff;
 }
 
-.nota {
+.help-text {
     font-size: 0.8rem;
-    color: var(--tenue);
+    color: var(--color-text-muted);
     line-height: 1.4;
 }
 

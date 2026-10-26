@@ -1,168 +1,197 @@
-const premuti = new Map();
-const velocita = document.getElementById('velocita');
-const messaggio = document.getElementById('messaggio');
-let timer = null;
+const pressedControls = new Map();
 
-velocita.addEventListener("input", () => {
-    document.getElementById('velocitaValore').textContent = velocita.value;
+const speed_slider = document.getElementById("speedSlider");
+const status_message = document.getElementById("statusMessage");
+const takeoff_button = document.getElementById("takeoffButton");
+const land_button = document.getElementById("landButton");
+const emergency_button = document.getElementById("emergencyButton");
+
+let sendTimer = null;
+
+const STOP_COMMAND = { leftRight: 0, forwardBack: 0, upDown: 0, yaw: 0 };
+
+// Tasti della tastiera -> [asse, direzione]
+const keyBindings = {
+    w: ["forwardBack", 1],
+    s: ["forwardBack", -1],
+    a: ["leftRight", -1],
+    d: ["leftRight", 1],
+    r: ["upDown", 1],
+    f: ["upDown", -1],
+    q: ["yaw", -1],
+    e: ["yaw", 1]
+};
+
+speed_slider.addEventListener("input", () => {
+    document.getElementById("speedValue").textContent = speed_slider.value;
 });
 
-function mostra(testo) {
-    messaggio.textContent = testo;
+function showMessage(text) {
+    status_message.textContent = text;
 }
 
-async function post(url, corpo) {
+async function postJson(url, body) {
     try {
-        const r = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(corpo || {})
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body || {})
         });
-        const d = await r.json();
+        const data = await response.json();
 
-        if (!d.ok) mostra(d.error || 'Errore');
+        if (!data.ok) showMessage(data.error || "Errore");
 
-        return d;
-    } catch (e) {
-        mostra('Drone non raggiungibile');
+        return data;
+    } catch (error) {
+        showMessage("Drone non raggiungibile");
 
         return { ok: false };
     }
 }
 
-function vettore() {
-    const v = { lr: 0, fb: 0, ud: 0, yaw: 0 };
+function buildRcCommand() {
+    const command = { ...STOP_COMMAND };
 
-    for (const chiave of premuti.keys()) {
-        const [asse, dir] = chiave.split(':');
-        v[asse] += Number(dir) * Number(velocita.value);
+    for (const controlKey of pressedControls.keys()) {
+        const [axis, direction] = controlKey.split(":");
+        command[axis] += Number(direction) * Number(speed_slider.value);
     }
 
-    return v;
+    return command;
 }
 
-function invia() {
-    post('/rc', vettore());
+function sendRcCommand() {
+    postJson("/rc", buildRcCommand());
 }
 
-function aggiorna() {
-    if (premuti.size > 0 && !timer) {
-        invia();
-        timer = setInterval(invia, 100);
-    } else if (premuti.size === 0 && timer) {
-        clearInterval(timer);
-        timer = null;
-        post('/rc', { lr: 0, fb: 0, ud: 0, yaw: 0 });
+/**
+ * Avvia l'invio ripetuto (ogni 100 ms) quando c'è almeno un controllo premuto
+ * e lo ferma, mandando uno stop, quando vengono rilasciati tutti
+ */
+function updateSendLoop() {
+    if (pressedControls.size > 0 && !sendTimer) {
+        sendRcCommand();
+        sendTimer = setInterval(sendRcCommand, 100);
+    } else if (pressedControls.size === 0 && sendTimer) {
+        clearInterval(sendTimer);
+        sendTimer = null;
+        postJson("/rc", STOP_COMMAND);
     }
 }
 
-function preme(asse, dir, el) {
-    premuti.set(asse + ':' + dir, el);
+function pressControl(axis, direction, button) {
+    pressedControls.set(axis + ":" + direction, button);
 
-    if (el) el.classList.add('attivo');
+    if (button) button.classList.add("active");
 
-    aggiorna();
+    updateSendLoop();
 }
 
-function rilascia(asse, dir, el) {
-    premuti.delete(asse + ':' + dir);
+function releaseControl(axis, direction, button) {
+    pressedControls.delete(axis + ":" + direction);
 
-    if (el) el.classList.remove('attivo');
+    if (button) button.classList.remove("active");
 
-    aggiorna();
+    updateSendLoop();
 }
 
-function fermaTutto() {
-    for (const el of premuti.values()) if (el) el.classList.remove('attivo');
+function stopAll() {
+    for (const button of pressedControls.values()) {
+        if (button) button.classList.remove("active");
+    }
 
-    premuti.clear();
-    aggiorna();
-    post('/rc', { lr: 0, fb: 0, ud: 0, yaw: 0 });
+    pressedControls.clear();
+    updateSendLoop();
+    postJson("/rc", STOP_COMMAND);
 }
 
-document.querySelectorAll('button[data-axis]').forEach(b => {
-    const asse = b.dataset.axis, dir = Number(b.dataset.dir);
-    b.addEventListener('pointerdown', e => { b.setPointerCapture(e.pointerId); preme(asse, dir, b); });
+function findButton(axis, direction) {
+    return document.querySelector(`button[data-axis="${axis}"][data-direction="${direction}"]`);
+}
 
-    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => b.addEventListener(ev, () => rilascia(asse, dir, b)));
+document.querySelectorAll("button[data-axis]").forEach(button => {
+    const axis = button.dataset.axis;
+    const direction = Number(button.dataset.direction);
+
+    button.addEventListener("pointerdown", event => {
+        button.setPointerCapture(event.pointerId);
+        pressControl(axis, direction, button);
+    });
+
+    ["pointerup", "pointercancel", "lostpointercapture"].forEach(eventName => {
+        button.addEventListener(eventName, () => releaseControl(axis, direction, button));
+    });
 });
 
-const tasti = {
-    w: ['fb', 1], s: ['fb', -1], a: ['lr', -1], d: ['lr', 1],
-    r: ['ud', 1], f: ['ud', -1], q: ['yaw', -1], e: ['yaw', 1]
-};
+window.addEventListener("keydown", event => {
+    if (event.repeat) return;
 
-function bottoneDi(asse, dir) {
-    return document.querySelector(`button[data-axis="${asse}"][data-dir="${dir}"]`);
-}
-
-window.addEventListener('keydown', e => {
-    if (e.repeat) return;
-
-    if (e.code === 'Space') {
-        e.preventDefault();
-        fermaTutto();
+    if (event.code === "Space") {
+        event.preventDefault();
+        stopAll();
 
         return;
     }
 
-    const t = tasti[e.key.toLowerCase()];
+    const binding = keyBindings[event.key.toLowerCase()];
 
-    if (t) preme(t[0], t[1], bottoneDi(t[0], t[1]));
+    if (binding) pressControl(binding[0], binding[1], findButton(binding[0], binding[1]));
 });
 
-window.addEventListener('keyup', e => {
-    const t = tasti[e.key.toLowerCase()];
+window.addEventListener("keyup", event => {
+    const binding = keyBindings[event.key.toLowerCase()];
 
-    if (t) rilascia(t[0], t[1], bottoneDi(t[0], t[1]));
+    if (binding) releaseControl(binding[0], binding[1], findButton(binding[0], binding[1]));
 });
 
-window.addEventListener('blur', fermaTutto);
+// Se la pagina perde il focus o viene nascosta, il drone si ferma
+window.addEventListener("blur", stopAll);
 
-document.addEventListener('visibilitychange', () => {
-    if (document.hidden) fermaTutto();
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopAll();
 });
 
-const bDecolla = document.getElementById('decolla');
-const bAtterra = document.getElementById('atterra');
+takeoff_button.addEventListener("click", async () => {
+    takeoff_button.disabled = true;
+    showMessage("Decollo in corso...");
+    const data = await postJson("/takeoff");
 
-bDecolla.addEventListener('click', async () => {
-    bDecolla.disabled = true;
-    mostra('Decollo in corso…');
-    const d = await post('/takeoff');
+    if (data.ok) showMessage("In volo");
 
-    if (d.ok) mostra('In volo');
-
-    bDecolla.disabled = false;
+    takeoff_button.disabled = false;
 });
 
-bAtterra.addEventListener('click', async () => {
-    fermaTutto();
-    bAtterra.disabled = true;
-    mostra('Atterraggio in corso…');
-    const d = await post('/land');
+land_button.addEventListener("click", async () => {
+    stopAll();
+    land_button.disabled = true;
+    showMessage("Atterraggio in corso...");
+    const data = await postJson("/land");
 
-    if (d.ok) mostra('Atterrato');
+    if (data.ok) showMessage("Atterrato");
 
-    bAtterra.disabled = false;
+    land_button.disabled = false;
 });
 
-document.getElementById('emergenza').addEventListener('click', async () => {
-    if (!confirm('Spegnere subito i motori? Se il drone è in volo cadrà.')) return;
+emergency_button.addEventListener("click", async () => {
+    if (!confirm("Spegnere subito i motori? Se il drone è in volo cadrà.")) return;
 
-    fermaTutto();
-    const d = await post('/emergency');
+    stopAll();
+    const data = await postJson("/emergency");
 
-    if (d.ok) mostra('Motori spenti');
+    if (data.ok) showMessage("Motori spenti");
 });
 
-async function stato() {
+async function refreshStatus() {
     try {
-        const d = await (await fetch('/status')).json();
-        document.getElementById('batteria').textContent = d.battery ?? '–';
-        document.getElementById('volo').textContent = d.flying ? 'in volo' : 'a terra';
+        const response = await fetch("/status");
+        const data = await response.json();
+
+        document.getElementById("batteryValue").textContent = data.battery ?? "-";
+        document.getElementById("flightState").textContent = data.flying ? "in volo" : "a terra";
     } catch { }
 }
 
-stato();
-setInterval(stato, 10000);
+refreshStatus();
+setInterval(refreshStatus, 10000);

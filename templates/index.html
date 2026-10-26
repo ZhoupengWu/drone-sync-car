@@ -4,61 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Pannello di controllo</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='index.css') }}">
 </head>
 <body>
     <header>
         <h1>Pannello di controllo</h1>
-        <div id="stato">Batteria <strong id="batteria">–</strong>% · <strong id="volo">a terra</strong> · <span id="messaggio"></span></div>
+        <div id="statusBar">Batteria <strong id="batteryValue">–</strong>% · <strong id="flightState">a terra</strong> ·
+            <span id="statusMessage"></span></div>
     </header>
 
     <main>
-        <div class="video"><img src="/video_feed" alt="Video in diretta dal Tello"></div>
+        <div class="video-panel"><img src="{{ url_for('videoFeed') }}" alt="Video in diretta dal Tello"></div>
 
-        <section class="comandi">
+        <section class="controls-panel">
             <div>
                 <h2>Decollo e atterraggio</h2>
-                <div class="volo">
-                    <button id="decolla">Decolla</button>
-                    <button id="atterra">Atterra</button>
+                <div class="takeoff-land-group">
+                    <button id="takeoffButton">Decolla</button>
+                    <button id="landButton">Atterra</button>
                 </div>
             </div>
 
             <div>
                 <h2>Spostamento</h2>
-                <div class="croce">
-                    <span class="vuoto"></span>
-                    <button data-axis="fb" data-dir="1">Avanti<small>W</small></button>
-                    <span class="vuoto"></span>
-                    <button data-axis="lr" data-dir="-1">Sinistra<small>A</small></button>
-                    <button data-axis="fb" data-dir="-1">Indietro<small>S</small></button>
-                    <button data-axis="lr" data-dir="1">Destra<small>D</small></button>
+
+                <div class="movement-pad">
+                    <span class="pad-spacer"></span>
+                    <button data-axis="forwardBack" data-direction="1">Avanti<small>W</small></button>
+                    <span class="pad-spacer"></span>
+                    <button data-axis="leftRight" data-direction="-1">Sinistra<small>A</small></button>
+                    <button data-axis="forwardBack" data-direction="-1">Indietro<small>S</small></button>
+                    <button data-axis="leftRight" data-direction="1">Destra<small>D</small></button>
                 </div>
             </div>
 
             <div>
                 <h2>Quota e rotazione</h2>
-                <div class="coppia">
-                    <button data-axis="ud" data-dir="1">Su<small>R</small></button>
-                    <button data-axis="ud" data-dir="-1">Giù<small>F</small></button>
+
+                <div class="button-row">
+                    <button data-axis="upDown" data-direction="1">Su<small>R</small></button>
+                    <button data-axis="upDown" data-direction="-1">Giù<small>F</small></button>
                 </div>
-                <div class="coppia">
-                    <button data-axis="yaw" data-dir="-1">Ruota a sinistra<small>Q</small></button>
-                    <button data-axis="yaw" data-dir="1">Ruota a destra<small>E</small></button>
+
+                <div class="button-row">
+                    <button data-axis="yaw" data-direction="-1">Ruota a sinistra<small>Q</small></button>
+                    <button data-axis="yaw" data-direction="1">Ruota a destra<small>E</small></button>
                 </div>
             </div>
 
-            <label class="velocita">Velocità
-                <input type="range" id="velocita" min="10" max="60" step="5" value="30">
-                <output id="velocitaValore">30</output>
+            <label class="speed-control">Velocità
+                <input type="range" id="speedSlider" min="10" max="60" step="5" value="30">
+                <output id="speedValue">30</output>
             </label>
 
-            <p class="nota">Tieni premuto un pulsante (o un tasto) per muoverti, rilascia per fermarti. Barra spaziale: stop.</p>
+            <p class="help-text">Tieni premuto un pulsante (o un tasto) per muoverti, rilascia per fermarti. Barra spaziale: stop.</p>
 
-            <button id="emergenza">Emergenza: spegni i motori</button>
+            <button id="emergencyButton">Emergenza: spegni i motori</button>
         </section>
     </main>
 
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
+    <script src="{{ url_for('static', filename='index.js') }}"></script>
 </body>
 </html>

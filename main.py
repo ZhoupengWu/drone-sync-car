@@ -21,11 +21,10 @@ tello = Tello()
 frameReader = None
 
 
-
 def clamp(valore):
     return max(-100, min(100, int(valore)))
 
-def openBroswer():
+def openBrowser():
     time.sleep(5)
     webbrowser.open(f"http://{ip_address}:{port_ip_address}")
 
@@ -81,14 +80,14 @@ def emergency():
 
 @app.post("/rc")
 def rc():
-    dati = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True) or {}
 
     if tello.is_flying:
         tello.send_rc_control(
-            clamp(dati.get("lr", 0)),
-            clamp(dati.get("fb", 0)),
-            clamp(dati.get("ud", 0)),
-            clamp(dati.get("yaw", 0)),
+            clamp(data.get("leftRight", 0)),
+            clamp(data.get("forwardBack", 0)),
+            clamp(data.get("upDown", 0)),
+            clamp(data.get("yaw", 0)),
         )
 
     return jsonify(ok=True)
@@ -122,6 +121,9 @@ if __name__ == "__main__":
 
         frameReader = tello.get_frame_read()
         print(f"Pannello su http://{ip_address}:{port_ip_address}")
+
+        threading.Thread(target=openBrowser, daemon=True).start()
+
         app.run(
             host=ip_address,
             port=port_ip_address,
