@@ -6,6 +6,7 @@ from flask import Flask, Response, jsonify, render_template, request
 from djitellopy import Tello
 import webbrowser
 from dotenv import load_dotenv
+from services.marker import Marker
 
 load_dotenv()
 
@@ -19,6 +20,7 @@ app = Flask(__name__)
 lock = threading.Lock()
 tello = Tello()
 frameReader = None
+marker = Marker()
 
 
 def clamp(valore):
@@ -99,7 +101,9 @@ def generateFrames():
 
             continue
 
-        frame = cv2.cvtColor(frameReader.frame, cv2.COLOR_RGB2BGR)
+        frame, id_marker = marker.detect(frameReader.frame)
+        
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
         ok, buf = cv2.imencode(".jpg", frame)
 
         if ok:
