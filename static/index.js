@@ -84,6 +84,9 @@ function updateSendLoop() {
 function pressControl(axis, direction, button) {
     pressedControls.set(axis + ":" + direction, button);
 
+    // un comando manuale riprende il controllo: spegne la modalità auto
+    if (autoOn) setAuto(false);
+
     if (button) button.classList.add("active");
 
     updateSendLoop();
@@ -126,10 +129,15 @@ document.querySelectorAll("button[data-axis]").forEach(button => {
 });
 
 window.addEventListener("keydown", event => {
+    if (event.target === target_input) return;
+
     if (event.repeat) return;
 
     if (event.code === "Space") {
         event.preventDefault();
+
+        if (autoOn) setAuto(false);
+
         stopAll();
 
         return;
@@ -141,6 +149,8 @@ window.addEventListener("keydown", event => {
 });
 
 window.addEventListener("keyup", event => {
+    if (event.target === target_input) return;
+
     const binding = keyBindings[event.key.toLowerCase()];
 
     if (binding) releaseControl(binding[0], binding[1], findButton(binding[0], binding[1]));
@@ -195,3 +205,61 @@ async function refreshStatus() {
 
 refreshStatus();
 setInterval(refreshStatus, 10000);
+
+// ---------- Inseguimento marker ----------
+const auto_button = document.getElementById("autoButton");
+const calibrate_button = document.getElementById("calibrateButton");
+const target_input = document.getElementById("targetInput");
+const auto_info = document.getElementById("autoInfo");
+
+let autoOn = false;
+
+function renderAuto() {
+    auto_button.classList.toggle("active", autoOn);
+    auto_button.setAttribute("aria-pressed", String(autoOn));
+    auto_button.querySelector("small").textContent = autoOn ? "ON" : "OFF";
+}
+
+async function setAuto(enabled) {
+    autoOn = enabled;
+    renderAuto();
+    await postJson("/auto", { enabled });
+}
+
+auto_button.addEventListener("click", () => setAuto(!autoOn));
+
+calibrate_button.addEventListener("click", async () => {
+    const data = await postJson("/calibrate");
+
+    if (data.ok) showMessage("Distanza memorizzata");
+});
+
+target_input.addEventListener("change", () => {
+    const value = target_input.value === "" ? null : Number(target_input.value);
+
+    postJson("/target", { id: value });
+});
+
+async function refreshAutoState() {
+    try {
+        const response = await fetch("/auto_state");
+        const data = await response.json();
+
+        autoOn = data.auto;
+        renderAuto();
+
+        const [, forwardBack, upDown, yaw] = data.command;
+        const seen = data.info
+            ? `marker ${data.info.id}, area ${Math.round(data.info.area)}`
+            : "marker non visibile";
+        const distance = data.area_target
+            ? `distanza obiettivo: area ${Math.round(data.area_target)}`
+            : "distanza non memorizzata";
+        const simulated = data.auto && !data.flying ? " (prova a terra: comandi non inviati)" : "";
+
+        auto_info.textContent =
+            `${seen} · ${distance} · avanti ${forwardBack}, su ${upDown}, rotazione ${yaw}${simulated}`;
+    } catch { }
+}
+
+setInterval(refreshAutoState, 300);

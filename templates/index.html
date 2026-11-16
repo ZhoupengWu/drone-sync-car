@@ -59,6 +59,21 @@
 
             <p class="help-text">Tieni premuto un pulsante (o un tasto) per muoverti, rilascia per fermarti. Barra spaziale: stop.</p>
 
+            <div>
+                <h2>Inseguimento marker</h2>
+
+                <div class="button-row">
+                    <button id="autoButton" aria-pressed="false">Auto<small>OFF</small></button>
+                    <button id="calibrateButton">Memorizza distanza<small>marker visibile</small></button>
+                </div>
+
+                <label class="target-control">Marker da seguire
+                    <input type="number" id="targetInput" min="0" max="249" placeholder="qualsiasi">
+                </label>
+
+                <p class="help-text" id="autoInfo">–</p>
+            </div>
+
             <button id="emergencyButton">Emergenza: spegni i motori</button>
         </section>
     </main>

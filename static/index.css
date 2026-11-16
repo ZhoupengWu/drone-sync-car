@@ -218,3 +218,22 @@ button:disabled {
         transition: none;
     }
 }
+
+.target-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.target-control input {
+    width: 9ch;
+    font: inherit;
+    padding: 6px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--color-text);
+}
