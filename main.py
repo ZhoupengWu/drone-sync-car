@@ -101,9 +101,8 @@ def generateFrames():
 
             continue
 
-        frame, id_marker = marker.detect(frameReader.frame)
-        
         frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+        frame, info = marker.detect(frame)
         ok, buf = cv2.imencode(".jpg", frame)
 
         if ok:

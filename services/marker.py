@@ -2,20 +2,33 @@ import cv2
 
 class Marker:
     def __init__(self):
-        self.dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250)
-        self.detector = cv2.aruco.ArucoDetector(self.dictionary, cv2.aruco.DetectorParameters())
+        self.detector = cv2.aruco.ArucoDetector(
+            cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_6X6_250),
+            cv2.aruco.DetectorParameters(),
+        )
 
-    def detect(self, frame):
-        id_marker = None
+    def detect(self, frame, target_id=None):
+        h, w = frame.shape[:2]
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        corners, ids, _ = self.detector.detectMarkers(gray)
 
-        for _ in range(5):
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            corners, ids, _ = self.detector.detectMarkers(gray)
+        if ids is None:
+            return frame, None
 
-            if ids is not None:
-                cv2.aruco.drawDetectedMarkers(frame, corners, ids)
+        cv2.aruco.drawDetectedMarkers(frame, corners, ids)
 
-                for _, k in zip(corners, ids.flatten()):
-                    id_marker = k
+        for c, i in zip(corners, ids.flatten()):
+            if target_id is not None and int(i) != target_id:
+                continue
 
-        return frame, id_marker
+            pts = c[0]
+            cx, cy = pts.mean(axis=0)
+
+            return frame, {
+                "id": int(i),
+                "err_x": float((cx - w / 2) / (w / 2)),
+                "err_y": float((cy - h / 2) / (h / 2)),
+                "area": float(cv2.contourArea(pts)),
+            }
+
+        return frame, None
